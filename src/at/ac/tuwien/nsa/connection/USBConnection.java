@@ -8,11 +8,12 @@ import gnu.io.UnsupportedCommOperationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Calendar;
 
 import org.apache.log4j.Logger;
 
+import at.ac.tuwien.nsa.datastore.ResultStorage;
+import at.ac.tuwien.nsa.measurement.QualityMeasurementThread;
 import at.ac.tuwien.nsa.protocol.AttentionMessage;
 import at.ac.tuwien.nsa.protocol.HashResponse;
 import at.ac.tuwien.nsa.protocol.Message;
@@ -207,9 +208,10 @@ public class USBConnection implements Connection {
 	}
 
 	@Override
-	public List<Long> startMeasurement(boolean download) throws IOException, ProtocolException, ResetReceivedException {
-		List<Long> msDuration = new ArrayList<Long>();
-		
+	public void startMeasurement(boolean download, ResultStorage resultStorage,
+			QualityMeasurementThread qualityMeasurementThread)
+			throws IOException, ProtocolException, ResetReceivedException {
+
 		HashResponse responseOK;
 		AttentionMessage attn;
 
@@ -239,40 +241,50 @@ public class USBConnection implements Connection {
 		// 4. READ-OK
 		responseOK = new HashResponse(input);
 		responseOK.verify(message);
-		
+
 		Result result = null;
-		
-		while(true){
-			result = new Result(input, (short) 4); 
-			if(isOk(result)){
-				LOG.info("Start");
-				//Start TimeStamp
-				//raise quality measurement here
+
+		long startTimeMS = 0;
+		long endTimeMS = 0;
+		Calendar.getInstance().getTimeInMillis();
+
+		while (true) {
+			result = new Result(input, (short) 4);
+			if (isOk(result)) {
+				startTimeMS = Calendar.getInstance().getTimeInMillis();
+				resultStorage.addNewMeasurement(download);
+				qualityMeasurementThread.addQualityMeasurementNotification();
 			} else {
 				break;
 			}
-			
-			if(isOk(result)){
-				LOG.info("End");
-				//End Timestamp + calc difference
+			result = new Result(input, (short) 4);
+			if (isOk(result)) {
+				endTimeMS = Calendar.getInstance().getTimeInMillis();
+				resultStorage.addDurationToLastIncompleteMeasurement(endTimeMS
+						- startTimeMS);
 			} else {
 				break;
 			}
-		}
-		
-		if(wasTerminated(result)){
-			LOG.info("Measurement terminated correctly.");
-		} else {
-			throw new ProtocolException("The measurement failed for some reason.");
 		}
 
-		return msDuration;
+		if (wasTerminated(result)) {
+			if(download){
+				LOG.info("Download measurement terminated correctly.");
+			} else {
+				LOG.info("Upload measurement terminated correctly.");
+			}
+			
+		} else {
+			throw new ProtocolException(
+					"The measurement failed for some reason.");
+		}
+
 	}
 
 	private boolean isOk(Result result) {
 		return result.isPositive();
 	}
-	
+
 	private boolean wasTerminated(Result result) {
 		return result.getActionIdentifier() == ActionIdentifiers.EVAL_FINISHED;
 	}
