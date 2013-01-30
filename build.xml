@@ -1,0 +1,41 @@
+<!DOCTYPE project>
+<project name="nsa-network-quality-desktop" default="jar" basedir=".">
+
+	<property name="project.name" value="nsa-network-quality-desktop"/>
+	<property name="project.prettyname" value="NSANetworkQuality"/>
+	<property name="project.authors" value="S. Klein, C. Prybila"/>
+	
+	<path id="classpath">
+		<fileset dir="lib" includes="*.jar"/>
+	</path>
+	
+	<target name="init">
+		<mkdir dir="dist"/>
+		<mkdir dir="classes"/>
+	</target>
+		
+	<target name="clean">
+		<delete dir="dist"/>
+		<delete dir="classes"/>
+	</target>
+
+	<target name="compile" depends="init">
+		<javac srcdir="src" destdir="classes" includeantruntime="false" classpathref="classpath" />
+	</target>
+	
+	<target name="build" depends="compile">
+		<jar destfile="dist/${project.name}.jar" basedir="classes/" />
+	</target>
+	
+	<target name="jar" depends="init, compile">
+			<jar destfile="dist/qualityMeasurementClient.jar" filesetmanifest="mergewithoutmain">
+					<manifest>
+							<attribute name="Main-Class" value="at.ac.tuwien.nsa.main.NsaQualityMain"/>
+							<attribute name="Class-Path" value="."/>
+					</manifest>
+					<fileset dir="classes"/>
+					<zipfileset excludes="META-INF/*" src="lib/RXTXcomm.jar"/>
+					<zipfileset excludes="META-INF/*" src="lib/log4j-1.2.17.jar"/>
+			</jar>
+	</target>
+</project>
