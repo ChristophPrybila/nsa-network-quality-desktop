@@ -96,12 +96,16 @@ public class QualityMeasurementThread extends Thread {
 			String countryAndNation = c.transmit(connectionOptions,
 					connectionOptionsResultLength);	
 			//+COPS: 0,2,"23210" + OK (232 = mcc, 10 = mnc) 
-	        String countryAndNationRegEx = "\\+COPS: 0,2,\"([0-9]+)\"*";
+	        String countryAndNationRegEx = "\\+COPS: .+?,\"([0-9]+)\"*";
 	        Pattern countryAndNationPattern = Pattern.compile(countryAndNationRegEx);
 	        Matcher countryAndNationMatcher =  countryAndNationPattern.matcher(countryAndNation);
 	        countryAndNationMatcher.find();
-	        mnc = Integer.parseInt(countryAndNationMatcher.group(1).substring(0,2));
-			mcc = Integer.parseInt(countryAndNationMatcher.group(1).substring(2));
+	        try {
+		        mcc = Integer.parseInt(countryAndNationMatcher.group(1).substring(0,3));
+		        mnc = Integer.parseInt(countryAndNationMatcher.group(1).substring(3));
+	        } catch (Exception e) {
+	        	System.out.println("COPS: " + countryAndNation);
+	        }
 
 			//Read OK
 			c.transmit(connectionRegistrationActivation,
@@ -110,7 +114,7 @@ public class QualityMeasurementThread extends Thread {
 			String locationAreaAndCellId = c.transmit(connectionRegistration,
 					connectionRegistrationResultLength);
 			// +CREG: 2,1,"07DA","BF74" + OK (07DA = lac, BF74 = cellid) 
-	        String locationAreaAndCellIdRegEx = "\\+CREG: 2,1,\"([0-9a-fA-F]+)\",\"([0-9a-fA-F]+)\"*";
+	        String locationAreaAndCellIdRegEx = "\\+CREG: .+?,\"([0-9a-fA-F]+)\",\"([0-9a-fA-F]+)\"*";
 	        Pattern locationAreaAndCellIdPattern = Pattern.compile(locationAreaAndCellIdRegEx);
 	        Matcher locationAreaAndCellIdMatcher =  locationAreaAndCellIdPattern.matcher(locationAreaAndCellId);
 	        locationAreaAndCellIdMatcher.find();

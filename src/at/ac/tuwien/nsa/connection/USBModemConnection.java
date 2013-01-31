@@ -106,8 +106,8 @@ public class USBModemConnection implements ModemConnection {
 	public String transmit(String atCommand, int lengthOfResult) throws IOException {
 		//logger.debug("Sending: " + atCommand.trim());
 		
-		if(!atCommand.endsWith("\r") && !atCommand.endsWith("" + '\032')) {
-			atCommand += "\r";
+		if(!atCommand.endsWith("\r\n") && !atCommand.endsWith("" + '\032')) {
+			atCommand += "\r\n";
 		}
 		
 		this.port.getOutputStream().write((atCommand).getBytes());
