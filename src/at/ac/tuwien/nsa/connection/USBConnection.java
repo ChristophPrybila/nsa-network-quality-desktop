@@ -248,13 +248,16 @@ public class USBConnection implements Connection {
 		long endTimeMS = 0;
 		Calendar.getInstance().getTimeInMillis();
 
+		int c = 0;
 		while (true) {
 			result = new Result(input, (short) 4);
+			LOG.info("result received " + (++c));
 			if (isOk(result)) {
 				startTimeMS = Calendar.getInstance().getTimeInMillis();
 				resultStorage.addNewMeasurement(download);
 				qualityMeasurementThread.addQualityMeasurementNotification();
 			} else {
+				LOG.info("break");
 				break;
 			}
 			result = new Result(input, (short) 4);
@@ -265,6 +268,7 @@ public class USBConnection implements Connection {
 			} else {
 				break;
 			}
+			LOG.info("continue");
 		}
 
 		if (wasTerminated(result)) {

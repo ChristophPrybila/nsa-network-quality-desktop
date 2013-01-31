@@ -27,7 +27,7 @@ public class NsaQualityMain {
 		ModemConnection cModem = null;
 		
 		if (args.length < 2) {
-			System.err.println("Please supply a valid GPS location for you measurement (e.g. java -jar measure.jar 46.33453 16.34234");
+			System.err.println("Please supply a valid GPS location for you measurement (e.g. java -jar qualityMeasurementClient.jar 46.33453 16.34234");
 			System.exit(1);
 		}
 		

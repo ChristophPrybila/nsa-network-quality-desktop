@@ -1,5 +1,7 @@
 package at.ac.tuwien.nsa.measurement;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
@@ -36,8 +38,6 @@ public class ConnectionMeasurementThread extends Thread {
 			e.printStackTrace();
 		}
 		
-		LOG.info(resultStorage.toJSON());
-		
 		LOG.info("starting upload measurement");
 		try {
 			c.startMeasurement(false, resultStorage, qualityMeasurementThread);
@@ -56,7 +56,16 @@ public class ConnectionMeasurementThread extends Thread {
 		if (qualityMeasurementThread != null) {
 			qualityMeasurementThread.stopThread();
 		}
-		LOG.info(resultStorage.toJSON());
+		
+		FileWriter fw = null;
+		try {
+			fw = new FileWriter(new File("result.json"));
+			fw.write(resultStorage.toJSON());
+			fw.close();
+		} catch (IOException e) {
+			System.err.println("Could not write to file, printing to standard output instead.");
+			System.out.println(resultStorage.toJSON());
+		}
 	}
 
 }
