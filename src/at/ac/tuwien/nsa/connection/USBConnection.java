@@ -250,25 +250,33 @@ public class USBConnection implements Connection {
 
 		int c = 0;
 		while (true) {
-			result = new Result(input, (short) 4);
-			LOG.info("result received " + (++c));
+			result = new Result(input, (short) 4);			
 			if (isOk(result)) {
+				if(download){
+					LOG.info("Download " + (++c) + "started.");
+				} else {
+					LOG.info("Upload " + (++c) + "started.");
+				}
 				startTimeMS = Calendar.getInstance().getTimeInMillis();
 				resultStorage.addNewMeasurement(download);
 				qualityMeasurementThread.addQualityMeasurementNotification();
 			} else {
-				LOG.info("break");
 				break;
 			}
 			result = new Result(input, (short) 4);
+			
 			if (isOk(result)) {
+				if(download){
+					LOG.info("Download " + (++c) + "finished.");
+				} else {
+					LOG.info("Upload " + (++c) + "finished.");
+				}
 				endTimeMS = Calendar.getInstance().getTimeInMillis();
 				resultStorage.addDurationToLastIncompleteMeasurement(endTimeMS
 						- startTimeMS);
 			} else {
 				break;
 			}
-			LOG.info("continue");
 		}
 
 		if (wasTerminated(result)) {
