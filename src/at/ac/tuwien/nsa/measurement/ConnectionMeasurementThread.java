@@ -36,6 +36,8 @@ public class ConnectionMeasurementThread extends Thread {
 			e.printStackTrace();
 		}
 		
+		LOG.info(resultStorage.toJSON());
+		
 		LOG.info("starting upload measurement");
 		try {
 			c.startMeasurement(false, resultStorage, qualityMeasurementThread);

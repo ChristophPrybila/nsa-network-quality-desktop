@@ -20,17 +20,24 @@ import at.ac.tuwien.nsa.measurement.QualityMeasurementThread;
 public class NsaQualityMain {
 
 	private static final Logger LOG = Logger.getLogger(NsaQualityMain.class);
-	private static final MeasurementPlace place = new MeasurementPlace(
-			"Technical University Vienna EI", 48.19606, 16.369947);
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 		Connection c = null;
 		ModemConnection cModem = null;
+		
+		if (args.length < 2) {
+			System.err.println("Please supply a valid GPS location for you measurement (e.g. java -jar measure.jar 46.33453 16.34234");
+			System.exit(1);
+		}
+		
+		MeasurementPlace place = new MeasurementPlace("", Double.parseDouble(args[0]), Double.parseDouble((args[1])));
+		
 		try {
 			cModem = USBModemConnectionFactory.getConnection();
 			if(cModem == null) {
-				throw new IOException("No Modem found.");
+				System.err.println("No Modem found.");
+				System.exit(2);
 			}
 		} catch (PortInUseException | UnsupportedCommOperationException
 				| IOException e) {
